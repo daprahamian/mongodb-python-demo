@@ -1,9 +1,9 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
-% include('head.html', title='Reviews')
+% include('helpers/head.html', title='Reviews')
 <body class="container">
-    % include('single_nav.html', label="Reviews", link="/reviews")
+    % include('helpers/single_nav.html', label="Reviews", link="/reviews")
     <h2>Recent Reviews</h2>
-    % include("table.html", headers=['User, Review'], columns=['username', 'content'], docs=docs)
+    % include("helpers/table.html", headers=['User, Review'], columns=['username', 'content'], docs=docs)
 </body>
 </html>
