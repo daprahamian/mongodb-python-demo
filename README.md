@@ -1,11 +1,20 @@
 # mongodb-python-demo
 
-## Dependencies
+## Installation
 
-+ [python](https://www.python.org/) >=v3
-+ [pip](https://pypi.org/project/pip/)
-+ [pymongo](https://api.mongodb.com/python/current/) >=v3.7.2 (`python -m pip install pymongo`)
-+ [bottle](https://bottlepy.org/docs/dev/) >=v0.12.16 (`python -m pip install bottle`)
+1. Install [python](https://www.python.org/)
+2. Run the following command
+
+```sh
+python3 -m pip install -r requirements.txt
+```
+
+This will install the following:
+
++ [pymongo](https://api.mongodb.com/python/current/)
+  + with tls support
+  + with srv support
++ [bottle](https://bottlepy.org/docs/dev/)
 
 ## Setup
 

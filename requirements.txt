@@ -1,0 +1,2 @@
+pymongo[srv,tls]==3.7
+bottle==0.12.16
