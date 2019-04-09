@@ -1,5 +1,6 @@
 # Documentation here: https://api.mongodb.com/python/current/
 from pymongo import MongoClient, WriteConcern
+from dao import MongoDBDao
 
 # Documentation here: https://bottlepy.org
 from bottle import Bottle, run, template, request, response, static_file
@@ -14,91 +15,90 @@ MONGODB_URL = 'mongodb://localhost:27017/'
 APP_HOST = 'localhost'
 # The Port you want to run this server on
 APP_PORT = 8080
-# The db name you want to use
-DB_NAME = 'test'
-# The collection name you want to use
-DATA_COLL_NAME = 'test'
-# Analytics collection name
-ANALYTICS_COLL_NAME = 'analytics'
+# Set to false to disable debug mode
+DEBUG = True
 
 # Your application, which runs an http server
 app = Bottle()
 
-# Your MongoClient, which speaks to the database
-client = MongoClient(MONGODB_URL)
-
-# The db you are using
-db = client[DB_NAME]
-
-# Collection objects
-data_collection = db[DATA_COLL_NAME]
-analytics_collection = db.get_collection(
-  ANALYTICS_COLL_NAME, 
-  write_concern = WriteConcern(w=0)
-)
+# Object to communicate with the database
+dao = MongoDBDao(MONGODB_URL)
 
 # Change this to the fields you want to display from your data set
 data_columns = ['_id']
 analytics_columns = [ 'timestamp', 'clientAddress', 'path', 'responseCode' ]
+reviews_columns = ['username', 'content']
+reviews_labels = ['User', 'Review']
 
-def send_analytics(_request, timestamp, response_code):
-  duration = datetime.datetime.utcnow() - timestamp
-
-  try:
-    obj = {
-      'timestamp': str(timestamp),
-      'clientAddress': _request.remote_addr,
-      'path': _request.path,
-      'method': _request.method,
-      'duration': str(duration),
-      'responseCode': response_code
-    }
-    analytics_collection.insert_one(obj)
-  except:
-    pass
+def err_msg(err):
+  return 'Error: {}'.format(err) if DEBUG else 'An Error Occurred'
 
 @app.route('/static/<filename:path>')
 def send_static(filename):
     return static_file(filename, root='./static/')
 
-@app.route('/')
-def hello():
-  return 'Hello World'
+@app.get('/')
+def homepage():
+  return template('homepage', submitted=False)
 
-@app.route('/data')
+@app.post('/')
+def post_review():
+  start = datetime.datetime.utcnow()
+  responseCode = 200
+  try:
+    dao.save_reviews(request.forms.get('username'), request.forms.get('content'))
+    return template('homepage', submitted=True)
+  except Exception as e:
+    responseCode = 500
+    response.status = responseCode
+    return err_msg(e)
+  finally:
+    # Try to log analytics. We do not care if this fails
+    dao.save_analytics(request, start, responseCode)
+
+@app.get('/data')
 def get_data():
   start = datetime.datetime.utcnow()
-  ret = None
   responseCode = 200
   try:
-    docs = data_collection.find({})
-    ret = template('table', docs=docs, columns=data_columns)
-  except:
+    docs = dao.get_data()
+    return template('table', docs=docs, columns=data_columns, title='Analytics')
+  except Exception as e:
     responseCode = 500
-    ret = 'There was some kind of error'
-  
-  # Try to log analytics. We do not care if this fails
-  send_analytics(request, start, responseCode)
-  
-  response.status = responseCode
-  return ret
+    response.status = responseCode
+    return err_msg(e)
+  finally:
+    # Try to log analytics. We do not care if this fails
+    dao.save_analytics(request, start, responseCode)
 
-@app.route('/analytics')
+@app.get('/reviews')
+def get_reviews():
+  start = datetime.datetime.utcnow()
+  responseCode = 200
+  try:
+    docs = dao.get_reviews()
+    return template('reviews', docs=docs)
+  except Exception as e:
+    responseCode = 500
+    response.status = responseCode
+    return err_msg(e)
+  finally:
+    # Try to log analytics. We do not care if this fails
+    dao.save_analytics(request, start, responseCode)
+
+@app.get('/analytics')
 def get_analytics():
   start = datetime.datetime.utcnow()
-  ret = None
   responseCode = 200
   try:
-    docs = analytics_collection.find({})
-    ret = template('table', docs=docs, columns=analytics_columns)
-  except:
+    docs = dao.get_analytics()
+    return template('table', docs=docs, columns=analytics_columns, title='Analytics')
+  except Exception as e:
     responseCode = 500
-    ret = 'There was some kind of error'
-  
-  # Try to log analytics. We do not care if this fails
-  send_analytics(request, start, responseCode)
-  
-  response.status = responseCode
-  return ret
+    response.status = responseCode
+    return err_msg(e)
+  finally:
+    # Try to log analytics. We do not care if this fails
+    dao.save_analytics(request, start, responseCode)
 
-run(app, host=APP_HOST, port=APP_PORT, reloader=False)
+run(app, host=APP_HOST, port=APP_PORT, reloader=DEBUG)
