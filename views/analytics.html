@@ -1,0 +1,9 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+% include('head.html', title='Analytics')
+<body class="container">
+    % include('single_nav.html', label="Analytics", link="/analytics")
+    <h2>Analytics</h2>
+    % include("table.html", headers=columns, columns=columns, docs=docs)
+</body>
+</html>

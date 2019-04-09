@@ -62,7 +62,7 @@ def get_data():
   responseCode = 200
   try:
     docs = dao.get_data()
-    return template('table', docs=docs, columns=data_columns, title='Analytics')
+    return template('data', docs=docs, columns=data_columns, title='Analytics')
   except Exception as e:
     responseCode = 500
     response.status = responseCode
@@ -92,7 +92,7 @@ def get_analytics():
   responseCode = 200
   try:
     docs = dao.get_analytics()
-    return template('table', docs=docs, columns=analytics_columns, title='Analytics')
+    return template('analytics', docs=docs, columns=analytics_columns, title='Analytics')
   except Exception as e:
     responseCode = 500
     response.status = responseCode

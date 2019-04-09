@@ -1,0 +1,12 @@
+<nav>
+  <ol class="breadcrumb">
+    % for i, link in enumerate(links):
+      % label = labels[i]
+      % if i == len(links) - 1:
+        <li class="breadcrumb-item active">{{label}}</li>
+      % else:
+        <li class="breadcrumb-item"><a href="{{link}}">{{label}}</a></li>
+      % end
+    % end
+  </ol>
+</nav>

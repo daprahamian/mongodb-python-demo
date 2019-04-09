@@ -1,26 +1,9 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 % include('head.html', title='Reviews')
-<body>
+<body class="container">
+    % include('single_nav.html', label="Reviews", link="/reviews")
     <h2>Recent Reviews</h2>
-    <div class="body-center">
-        <table>
-            <thead>
-            <tr>
-                <th> User </th>
-                <th> Review </th>
-            </tr>
-            </thead>
-            <tbody>
-            % for doc in docs:
-                <tr>
-                    <td><span> {{doc['username']}} </span></td>
-                    <td><span> {{doc['content']}} </span></td>
-                </tr>
-            % end
-            </tbody>
-        </table>
-        <p><a class="button" href="/">Home Page</a></p>
-    </div>
+    % include("table.html", headers=['User, Review'], columns=['username', 'content'], docs=docs)
 </body>
 </html>
