@@ -2,7 +2,7 @@
 from pymongo import MongoClient, WriteConcern
 
 # Documentation here: https://bottlepy.org
-from bottle import Bottle, run, template, request, response
+from bottle import Bottle, run, template, request, response, static_file
 
 import datetime
 
@@ -56,6 +56,10 @@ def send_analytics(_request, timestamp, response_code):
     analytics_collection.insert_one(obj)
   except:
     pass
+
+@app.route('/static/<filename:path>')
+def send_static(filename):
+    return static_file(filename, root='./static/')
 
 @app.route('/')
 def hello():
